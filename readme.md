@@ -2,7 +2,7 @@
 
 An offline-friendly, touchscreen-controlled automatic irrigation system using the **M5Stack CoreS3** and a **solar-powered water pump**.
 
-Web interface hosted on the device for easy configuration, plus optional **live camera stream** through an external Flask server.
+Web interface hosted on the device for easy configuration.
 
 ---
 
@@ -12,12 +12,10 @@ Web interface hosted on the device for easy configuration, plus optional **live 
   <tr>
     <td><strong>🌐 Web Interface</strong></td>
     <td><strong>📟 M5CoreS3 Screen</strong></td>
-    <td><strong>🖥️ Flask Server Stream</strong></td>
   </tr>
   <tr>
     <td><img src="assets/web_interface.png" width="280"/></td>
     <td><img src="assets/core_s3_screen.png" width="280"/></td>
-    <td><img src="assets/flask_stream.png" width="280"/></td>
   </tr>
 </table>
 
@@ -31,11 +29,10 @@ Web interface hosted on the device for easy configuration, plus optional **live 
 - Real-time display of:
   - RTC module status
   - Relay status
-  - Camera status
   - WiFi Access Point info
-- Optional live camera stream with image upload to external server
-- Remote server with simple browser-based viewer
 - Offline capable – full config via Access Point mode
+- Reliable timekeeping using external **RTC HYM8563**
+- Full MicroPython implementation using **UIFlow 2.2.5**
 
 ---
 
@@ -43,15 +40,14 @@ Web interface hosted on the device for easy configuration, plus optional **live 
 
 ### Hardware
 - M5Stack **CoreS3**
-- I2C **Relay Unit**
-- I2C **RTC (e.g. DS3231)**
-- Optional: **ESP32 camera (OV3660)** connected via I2C
+- I2C **Relay Unit** (connected via GPIO or Grove)
+- I2C **RTC HYM8563** (address 0x51)
 - 12V Solar-powered water pump system
-- microSD card for future photo storage (optional)
+- microSD card for optional photo storage
 
 ### Software
-- **UIFlow 2.2.5 (MicroPython)**
-- Python 3.11+ on your remote server (Debian/Proxmox/etc.)
+- **UIFlow 2.2.5 (MicroPython)** on M5CoreS3
+- Optional: Python 3.11+ (if planning future server integration)
 
 ---
 
@@ -59,9 +55,9 @@ Web interface hosted on the device for easy configuration, plus optional **live 
 
 1. CoreS3 acts as the main controller and Access Point (`RIEGO_M5`)
 2. User connects via browser and configures irrigation schedule
-3. Relay activates pump at specified time, using internal RTC
-4. Optional: camera module uploads hourly snapshots to remote server
-5. External Flask server receives and displays stream
+3. Internal RTC (HYM8563) keeps time even when powered off
+4. At scheduled time, the relay activates the pump
+5. User can also run manual tests and disable irrigation via web UI
 
 ---
 
@@ -69,93 +65,75 @@ Web interface hosted on the device for easy configuration, plus optional **live 
 
 ```
 m5CoreS3/
-├── main.py              ← MicroPython code (UIFlow 2.0 compatible)
-├── urequests.py         ← Required for HTTP requests (upload with Thonny)
-└── config.json          ← Auto-created for storing hour/duration
-flask_server/
-└── server.py            ← Flask server code to receive and show stream
+├── main.py              ← Main MicroPython logic for CoreS3
+├── config.json          ← Auto-created to store hour/duration configuration
 ```
 
 ---
 
 ## 🚀 Installation Instructions
 
-### 🔥 Install via M5Burner
+### ✅ Option 1: Easy Install with **UIFlow 2.0**
 
-If you prefer a simpler method, you can also install this project via **M5Burner**:
+1. Make sure your **M5Stack CoreS3** has **UIFlow 2.2.5** firmware installed (you can use **M5Burner** to flash it).
+2. Go to [UIFlow 2.0 Web IDE](https://uiflow2.m5stack.com).
+3. Connect your device (via USB or Wi-Fi).
+4. Upload the file `main.py` to the device filesystem (`/flash`).
+5. Restart the device – the irrigation system will launch automatically.
 
-1. Open **M5Burner** on your computer.
-2. Select the firmware **`m5CoreS3-automatic-irrigation`** from the list (or add it manually if not listed).
-3. Connect your **M5Stack CoreS3** via USB.
-4. Click **Burn** to install the firmware.
-5. The device will reboot and launch the irrigation system automatically.
-
-
-### 1. 📲 Upload to M5Stack CoreS3
-
-- Use **Thonny** or **UIFlow Web IDE**
-- Upload the following files to the **root** of the device:
-  - `main.py`
-  - `urequests.py`
-- Restart the device.
-
-> **Important:** `urequests.py` is required for HTTP communication with the external server.  
-> Place it in the **root** (`/flash`) using Thonny.
+> ⚠️ `urequests.py` is **not required**. All logic is handled inside `main.py`.
 
 ---
 
-### 2. 🖥️ Set Up the Flask Server
+### 🔥 Option 2: Install with **M5Burner** (coming soon)
 
-On your **Debian/Proxmox machine**:
+Soon you'll be able to install this project as a complete firmware directly from **M5Burner**:
 
-```bash
-sudo apt update
-sudo apt install python3-venv
-python3 -m venv servidorriego
-source servidorriego/bin/activate
-pip install flask
-```
+- Just select `m5CoreS3-automatic-irrigation` from the list and click **"Burn"**.
+- The system will boot and start automatically.
 
-Create a file called `server.py` and paste the contents of `flask_server/server.py`
-
-Then run:
-
-```bash
-python server.py
-```
-
-The server will start at:  
-`http://<IP_LOCAL>:5000/stream` ← use this in your browser
-
----
-
-## 🌐 Live Stream Integration
-
-The stream is **triggered only when enabled** from the CoreS3 web interface.  
-It will stop automatically when the user presses **"Stop stream"**, to avoid using data from a SIM card or consuming power.
+> 📌 This option will be available shortly.
 
 ---
 
 ## 📡 Wi-Fi Access Mode (Default)
 
-When powered on, the M5CoreS3 becomes an access point with:
+When powered on, the M5CoreS3 becomes an access point:
 
 - **SSID:** `RIEGO_M5`
 - **Password:** `Samuel123`
 
-Access the UI via browser at `192.168.4.1`
+Access the UI via browser at:
+
+```
+http://192.168.4.1
+```
 
 ---
 
-## 📷 Stream Preview
+## ⏰ RTC Manual Time Sync (Optional)
 
-The stream shows a new image every 2 seconds, uploaded from the CoreS3.
+To manually update RTC from REPL:
 
-```html
-<img src="/imagenes/ultima.jpg" width="80%">
+```python
+from machine import Pin, I2C
+RTC_I2C_ADDR = 0x51
+i2c = I2C(1, scl=Pin(1), sda=Pin(2))
+
+def dec2bcd(dec):
+    return ((dec // 10) << 4) | (dec % 10)
+
+new_time = bytes([
+    dec2bcd(0),    # Seconds
+    dec2bcd(59),   # Minutes
+    dec2bcd(8),    # Hours
+    dec2bcd(14),   # Day
+    dec2bcd(1),    # Weekday
+    dec2bcd(4),    # Month
+    dec2bcd(25)    # Year (2025 → 25)
+])
+i2c.writeto_mem(RTC_I2C_ADDR, 0x02, new_time)
 ```
-
-You can customize this in `server.py`.
 
 ---
 
@@ -167,5 +145,5 @@ MIT License – Free to use, adapt, and improve.
 
 ## 📬 Contact
 
-For suggestions, ideas, or to collaborate:
-💌 samuelcarre@mac.com  
+For suggestions, ideas, or collaboration:
+💌 samuelcarre@mac.com
