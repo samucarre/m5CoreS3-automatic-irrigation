@@ -43,11 +43,9 @@ Web interface hosted on the device for easy configuration.
 - I2C **Relay Unit** (connected via GPIO or Grove)
 - I2C **RTC HYM8563** (address 0x51)
 - 12V Solar-powered water pump system
-- microSD card for optional photo storage
 
 ### Software
 - **UIFlow 2.2.5 (MicroPython)** on M5CoreS3
-- Optional: Python 3.11+ (if planning future server integration)
 
 ---
 
@@ -81,7 +79,6 @@ m5CoreS3/
 4. Upload the file `main.py` to the device filesystem (`/flash`).
 5. Restart the device – the irrigation system will launch automatically.
 
-> ⚠️ `urequests.py` is **not required**. All logic is handled inside `main.py`.
 
 ---
 
