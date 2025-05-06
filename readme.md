@@ -16,6 +16,7 @@ Web interface hosted on the device for easy configuration.
   <tr>
     <td><img src="assets/web_interface.png" width="280"/></td>
     <td><img src="assets/core_s3_screen.png" width="280"/></td>
+    <td><img src="assets/coreirrigation.png" width="280"/></td>
   </tr>
 </table>
 

@@ -1,5 +1,20 @@
-# === YOUR COMPLETE CODE WITH REMOTE CAMERA AND IRRIGATION LOGIC ===
-# We'll add integration with external server to check stream status
+# 💧 M5CoreS3 Automatic Irrigation System
+#
+# This project implements a remote-controlled, offline-friendly automatic irrigation system
+# utilizing the M5Stack CoreS3 as the central controller. It features a web interface,
+# hosted directly on the device, for easy configuration of irrigation schedules and manual controls.
+# The system is designed to manage a solar-powered water pump based on user-defined settings
+# stored locally. It also integrates with an external Real-Time Clock (RTC HYM8563) for reliable
+# timekeeping, ensuring accurate irrigation cycles even when the device is powered off or
+# loses Wi-Fi connectivity.
+#
+# Key Features:
+# - Configurable irrigation start hour (09:00 - 20:00).
+# - Adjustable irrigation duration (5 - 60 minutes, in 5-minute increments).
+# - Manual test irrigation mode accessible via the web interface.
+# - Real-time status monitoring of RTC, relay, and Wi-Fi Access Point on the M5CoreS3 screen.
+# - Operates autonomously using Access Point mode, requiring no external internet connection for basic functionality.
+# - Persistent configuration storage in a local 'config.json' file.
 
 # === IMPORTS AND INITIAL SETUP ===
 import M5
