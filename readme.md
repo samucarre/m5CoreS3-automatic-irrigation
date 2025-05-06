@@ -12,6 +12,7 @@ Web interface hosted on the device for easy configuration.
   <tr>
     <td><strong>🌐 Web Interface</strong></td>
     <td><strong>📟 M5CoreS3 Screen</strong></td>
+    <td><strong>🔧 Installation </strong></td>
   </tr>
   <tr>
     <td><img src="assets/web_interface.png" width="280"/></td>
